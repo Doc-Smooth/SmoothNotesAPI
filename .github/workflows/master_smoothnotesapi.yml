@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'SmoothNotesAPI'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4214CC9307A14C9099237C6985E9E340 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0B526317D6844F26BB656866526CE291 }}
           package: .
