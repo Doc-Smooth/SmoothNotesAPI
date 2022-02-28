@@ -6,11 +6,11 @@ using SmoothNotesAPI.Models.Interfaces;
 namespace SmoothNotesAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class ProfileController : ControllerBase
+public class FolderController : ControllerBase
 {
     private readonly DataContext _context;
 
-    public ProfileController(DataContext context)
+    public FolderController(DataContext context)
     {
         _context = context;
     }
@@ -18,23 +18,21 @@ public class ProfileController : ControllerBase
     //Create
     // POST api/<ValuesController>
     [HttpPost]
-    public async Task<ActionResult> Post([FromBody] Profile args)
+    public async Task<ActionResult> Post([FromBody] Folder args)
     {
         try
         {
-            Profile item = new Profile()
+            Folder item = new Folder()
             {
                 Id = Guid.NewGuid(),
+                ProfileId = args.ProfileId,
                 Name = args.Name,
-                PW = args.PW,
-                Salt = args.Salt,
-                PrK = args.PrK,
-                PuK = args.PuK,
+                Fav = false,
                 CrDate = DateTime.Now.Date,
                 EdDate = DateTime.Now.Date
             };
 
-            await _context.Profiles.AddAsync(item);
+            await _context.Folders.AddAsync(item);
             await _context.SaveChangesAsync();
             return Ok("Created Successful");
         }
@@ -51,9 +49,7 @@ public class ProfileController : ControllerBase
     {
         try
         {
-            //return Ok(await _context.Profiles.Include(s => s.folders).ToListAsync());
-
-            return Ok(await _context.Profiles.Include(f => f.folders).ThenInclude(n => n.notes).ToListAsync());
+            return Ok(await _context.Folders.Include(n => n.notes).ToListAsync());
         }
         catch (Exception e)
         {
@@ -66,8 +62,7 @@ public class ProfileController : ControllerBase
     {
         try
         {
-            //var item = await _context.Profiles.Include(s => s.folders).FirstAsync(u => u.Id == id);
-            var item = await _context.Profiles.Where(p => p.Id == id).Include(f => f.folders).ThenInclude(n => n.notes).FirstOrDefaultAsync();
+            var item = await _context.Folders.Include(n => n.notes).FirstOrDefaultAsync(u => u.Id == id);
             if (item == null)
                 return NotFound();
 
@@ -82,7 +77,7 @@ public class ProfileController : ControllerBase
     //Update
     // PUT api/<ValuesController>/id
     [HttpPut("{id}")]
-    public async Task<ActionResult> Put([FromBody] Profile item)
+    public async Task<ActionResult> Put([FromBody] Folder item)
     {
         try
         {
@@ -106,12 +101,12 @@ public class ProfileController : ControllerBase
         try
         {
             //Finding Item with Id == id
-            var item = await _context.Profiles.FindAsync(id);
+            var item = await _context.Folders.FindAsync(id);
 
             if (item == null)
                 return NotFound();
 
-            _context.Profiles.Remove(item);
+            _context.Folders.Remove(item);
             await _context.SaveChangesAsync();
             return Ok("Deletion Successful");
         }
