@@ -8,4 +8,5 @@ public class Folder
     public DateTime CrDate { get; set; }
     public DateTime EdDate { get; set; }
 
+    public Note notes { get; set; }
 }

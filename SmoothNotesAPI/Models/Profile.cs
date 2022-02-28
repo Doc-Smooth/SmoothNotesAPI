@@ -9,4 +9,6 @@ public class Profile
     public string PuK { get; set; } = string.Empty;
     public DateTime CrDate { get; set; }
     public DateTime EdDate { get; set; }
+
+    public Folder folders { get; set; }
 }
