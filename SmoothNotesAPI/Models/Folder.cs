@@ -1,5 +1,7 @@
-﻿namespace SmoothNotesAPI.Models;
-public class Folder
+﻿using SmoothNotesAPI.Models.Interfaces;
+
+namespace SmoothNotesAPI.Models;
+public class Folder : IFolder
 {
     public Guid Id { get; set; }
     public Guid ProfileId { get; set; }
@@ -8,4 +10,5 @@ public class Folder
     public DateTime CrDate { get; set; }
     public DateTime EdDate { get; set; }
 
+    public List<Note>? notes { get; set; }
 }

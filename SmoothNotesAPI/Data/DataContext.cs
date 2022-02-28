@@ -13,8 +13,5 @@ public class DataContext : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<LogFile> Logs { get; set; }
     public DbSet<DBAction> Actions { get; set; }
-    
-    //Testing Sets
-    public DbSet<WorkingTest> WorkingTests { get; set; }
 
 }
