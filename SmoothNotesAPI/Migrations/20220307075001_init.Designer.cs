@@ -12,8 +12,8 @@ using SmoothNotesAPI.Data;
 namespace SmoothNotesAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220228125157_Init")]
-    partial class Init
+    [Migration("20220307075001_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -150,10 +150,6 @@ namespace SmoothNotesAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PuK")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

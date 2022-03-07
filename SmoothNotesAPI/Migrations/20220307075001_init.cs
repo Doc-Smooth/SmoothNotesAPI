@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SmoothNotesAPI.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -43,7 +43,6 @@ namespace SmoothNotesAPI.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PW = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PrK = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PuK = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CrDate = table.Column<DateTime>(type: "datetime2", nullable: false),
