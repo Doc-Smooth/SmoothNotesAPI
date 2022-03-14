@@ -24,9 +24,8 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Folder", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");
@@ -41,8 +40,9 @@ namespace SmoothNotesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ProfileId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -91,22 +91,18 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Note", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ESK")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("EdDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("FolderId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("FolderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -125,9 +121,8 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Profile", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");
@@ -148,10 +143,6 @@ namespace SmoothNotesAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PuK")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Salt")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

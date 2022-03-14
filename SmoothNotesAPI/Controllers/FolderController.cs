@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmoothNotesAPI.Models;
 using SmoothNotesAPI.Models.Interfaces;
@@ -17,19 +18,19 @@ public class FolderController : ControllerBase
 
     //Create
     // POST api/<ValuesController>
-    [HttpPost]
-    public async Task<ActionResult> Post([FromBody] Folder args)
+    [HttpPost("add/id"), Authorize]
+    public async Task<ActionResult> Post(string id, [FromBody] string name)
     {
         try
         {
             Folder item = new Folder()
             {
-                Id = Guid.NewGuid(),
-                ProfileId = args.ProfileId,
-                Name = args.Name,
+                Id = Guid.NewGuid().ToString(),
+                ProfileId = id,
+                Name = name,
                 Fav = false,
-                CrDate = DateTime.Now.Date,
-                EdDate = DateTime.Now.Date
+                CrDate = DateTime.Now,
+                EdDate = DateTime.Now
             };
 
             await _context.Folders.AddAsync(item);
@@ -41,10 +42,34 @@ public class FolderController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+    //[HttpPost("add"), Authorize]
+    //public async Task<ActionResult> Post([FromBody] Folder args)
+    //{
+    //    try
+    //    {
+    //        Folder item = new Folder()
+    //        {
+    //            Id = Guid.NewGuid().ToString(),
+    //            ProfileId = args.ProfileId,
+    //            Name = args.Name,
+    //            Fav = false,
+    //            CrDate = DateTime.Now,
+    //            EdDate = DateTime.Now
+    //        };
+
+    //        await _context.Folders.AddAsync(item);
+    //        await _context.SaveChangesAsync();
+    //        return Ok("Created Successful");
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        return BadRequest(e.Message);
+    //    }
+    //}
 
     //Read
     // GET: api/<ValuesController>
-    [HttpGet]
+    [HttpGet, Authorize]
     public async Task<ActionResult<List<IBase>>> Get()
     {
         try
@@ -57,8 +82,8 @@ public class FolderController : ControllerBase
         }
     }
     // GET: api/<ValuesController>/id
-    [HttpGet("id")]
-    public async Task<ActionResult<IBase>> GetById(Guid id)
+    [HttpGet("id"), Authorize]
+    public async Task<ActionResult<IBase>> GetById(string id)
     {
         try
         {
@@ -74,9 +99,27 @@ public class FolderController : ControllerBase
         }
     }
 
+    // GET: api/<ValuesController>/id
+    [HttpGet("profileid"), Authorize]
+    public async Task<ActionResult<List<IBase>>> GetByProfileId(string profileid)
+    {
+        try
+        {
+            var items = await _context.Folders.Where(f => f.ProfileId == profileid).ToListAsync();
+            if (items.Count == 0)
+                return NotFound();
+
+            return Ok(items);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
     //Update
     // PUT api/<ValuesController>/id
-    [HttpPut("{id}")]
+    [HttpPut("edit"), Authorize]
     public async Task<ActionResult> Put([FromBody] Folder item)
     {
         try
@@ -95,13 +138,16 @@ public class FolderController : ControllerBase
 
     //Delete
     // DELETE api/<ValuesController>/id
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(Guid id)
+    [HttpDelete("id"), Authorize]
+    public async Task<ActionResult> Delete(string id)
     {
         try
         {
             //Finding Item with Id == id
             var item = await _context.Folders.FindAsync(id);
+            var notes = await _context.Notes.Where(n => n.FolderId == item.Id).ToListAsync();
+            foreach (var note in notes)
+                _context.Notes.Remove(note);
 
             if (item == null)
                 return NotFound();

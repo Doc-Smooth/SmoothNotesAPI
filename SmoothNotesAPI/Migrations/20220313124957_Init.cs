@@ -40,10 +40,9 @@ namespace SmoothNotesAPI.Migrations
                 name: "Profiles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PW = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PrK = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PuK = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CrDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -58,8 +57,8 @@ namespace SmoothNotesAPI.Migrations
                 name: "Folders",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfileId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProfileId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Fav = table.Column<bool>(type: "bit", nullable: false),
                     CrDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -80,11 +79,10 @@ namespace SmoothNotesAPI.Migrations
                 name: "Notes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FolderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FolderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ESK = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CrDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EdDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
