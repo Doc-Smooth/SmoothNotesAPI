@@ -29,10 +29,10 @@ public static class ConverterService
 
     public static string EncodeKey(string arg)
     {
-        return ByteArrayToHexString(Encoding.UTF8.GetBytes(arg));
+        return ByteArrayToHexString(Encoding.Unicode.GetBytes(arg));
     }
     public static string ReadEncodedKey(string arg)
     {
-        return Encoding.UTF8.GetString(HexStringToByteArray(arg));
+        return Encoding.Unicode.GetString(HexStringToByteArray(arg));
     }
 }

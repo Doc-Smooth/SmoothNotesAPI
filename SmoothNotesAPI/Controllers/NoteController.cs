@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmoothNotesAPI.Models;
 using SmoothNotesAPI.Models.Interfaces;
+using SmoothNotesAPI.Service;
 
 namespace SmoothNotesAPI.Controllers;
 [Route("api/[controller]")]
@@ -17,21 +19,37 @@ public class NoteController : ControllerBase
 
     //Create
     // POST api/<ValuesController>
-    [HttpPost]
+    [HttpPost, Authorize]
     public async Task<ActionResult> Post([FromBody] Note args)
     {
         try
         {
+            //Testing
+            //Move to Applikation side when possible
+            #region Testing
+            Folder folder = await _context.Folders.FirstOrDefaultAsync(f => f.Id == args.FolderId);
+            Profile profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == folder.ProfileId);
+            string key = ConverterService.ReadEncodedKey(ConverterService.ByteArrayToHexString(Convert.FromBase64String(profile.PuK)));
             Note item = new Note()
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 FolderId = args.FolderId,
                 Name = args.Name,
-                Text = args.Text,
-                ESK = args.ESK,
-                CrDate = DateTime.Now.Date,
-                EdDate = DateTime.Now.Date
+                Text = RSAService.RSAEncrypt(args.Text, key, false),
+                CrDate = DateTime.Now,
+                EdDate = DateTime.Now
             };
+            #endregion
+
+            //Note item = new Note()
+            //{
+            //    Id = Guid.NewGuid(),
+            //    FolderId = args.FolderId,
+            //    Name = args.Name,
+            //    Text = args.Text,
+            //    CrDate = DateTime.Now,
+            //    EdDate = DateTime.Now
+            //};
 
             await _context.Notes.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -45,7 +63,7 @@ public class NoteController : ControllerBase
 
     //Read
     // GET: api/<ValuesController>
-    [HttpGet]
+    [HttpGet, Authorize]
     public async Task<ActionResult<List<IBase>>> Get()
     {
         try
@@ -58,8 +76,8 @@ public class NoteController : ControllerBase
         }
     }
     // GET: api/<ValuesController>/id
-    [HttpGet("id")]
-    public async Task<ActionResult<IBase>> GetById(Guid id)
+    [HttpGet("id"), Authorize]
+    public async Task<ActionResult<IBase>> GetById(string id)
     {
         try
         {
@@ -75,9 +93,31 @@ public class NoteController : ControllerBase
         }
     }
 
+    //Testing ONLY
+    // GET: api/<ValuesController>/id
+    [HttpGet("id/profileId/show"), Authorize]
+    public async Task<ActionResult<IBase>> GetById(string id, string profileId, int show = 0)
+    {
+        try
+        {
+            AESService aes = new AESService();
+            Profile profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
+            var item = await _context.Notes.FirstOrDefaultAsync(u => u.Id == id);
+            item.Text = RSAService.RSADecrypt(item.Text, ConverterService.ReadEncodedKey(aes.Decrypt(profile.PrK, "Password123")), false);
+            if (item == null)
+                return NotFound();
+
+            return Ok(item);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
     //Update
     // PUT api/<ValuesController>/id
-    [HttpPut("{id}")]
+    [HttpPut("{id}"), Authorize]
     public async Task<ActionResult> Put([FromBody] Note item)
     {
         try
@@ -96,7 +136,7 @@ public class NoteController : ControllerBase
 
     //Delete
     // DELETE api/<ValuesController>/id
-    [HttpDelete("{id}")]
+    [HttpDelete("{id}"), Authorize]
     public async Task<ActionResult> Delete(Guid id)
     {
         try

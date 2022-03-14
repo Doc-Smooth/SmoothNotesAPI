@@ -12,8 +12,8 @@ using SmoothNotesAPI.Data;
 namespace SmoothNotesAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220307075001_init")]
-    partial class init
+    [Migration("20220313124957_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,9 +26,8 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Folder", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");
@@ -43,8 +42,9 @@ namespace SmoothNotesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProfileId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ProfileId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -93,22 +93,18 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Note", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ESK")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("EdDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("FolderId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("FolderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -127,9 +123,8 @@ namespace SmoothNotesAPI.Migrations
 
             modelBuilder.Entity("SmoothNotesAPI.Models.Profile", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CrDate")
                         .HasColumnType("datetime2");

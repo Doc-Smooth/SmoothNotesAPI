@@ -5,7 +5,7 @@ namespace SmoothNotesAPI.Service;
 
 public class AESService
 {
-    public byte[] GetKeyBytes(string arg)
+    private byte[] GetKeyBytes(string arg)
     {
         //string conv;
 
@@ -89,7 +89,8 @@ public class AESService
                     eData = ms.ToArray();
                 }
             }
-            final = ConverterService.ByteArrayToHexString(aes.IV) + ConverterService.ByteArrayToHexString(eData);
+
+            final = Convert.ToBase64String(ConverterService.HexStringToByteArray(ConverterService.ByteArrayToHexString(aes.IV) + ConverterService.ByteArrayToHexString(eData)));
         }
 
 
@@ -104,8 +105,8 @@ public class AESService
         if (Key == null || Key.Length <= 0) throw new ArgumentNullException("Key");
 
         string dData;
-        string iv = cText.Substring(0, 32);
-        byte[] data = ConverterService.HexStringToByteArray(cText.Substring(32));
+        string iv = ConverterService.ByteArrayToHexString(Convert.FromBase64String(cText)).Substring(0, 32);
+        byte[] data = ConverterService.HexStringToByteArray(ConverterService.ByteArrayToHexString(Convert.FromBase64String(cText)).Substring(32));
 
         using (Aes aes = Aes.Create())
         {
