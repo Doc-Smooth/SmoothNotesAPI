@@ -19,37 +19,21 @@ public class NoteController : ControllerBase
 
     //Create
     // POST api/<ValuesController>
-    [HttpPost, Authorize]
+    [HttpPost("add"), Authorize]
     public async Task<ActionResult> Post([FromBody] Note args)
     {
         try
         {
-            //Testing
-            //Move to Applikation side when possible
-            #region Testing
-            Folder folder = await _context.Folders.FirstOrDefaultAsync(f => f.Id == args.FolderId);
-            Profile profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == folder.ProfileId);
-            string key = ConverterService.ReadEncodedKey(ConverterService.ByteArrayToHexString(Convert.FromBase64String(profile.PuK)));
+
             Note item = new Note()
             {
                 Id = Guid.NewGuid().ToString(),
                 FolderId = args.FolderId,
                 Name = args.Name,
-                Text = RSAService.RSAEncrypt(args.Text, key, false),
+                Text = args.Text,
                 CrDate = DateTime.Now,
                 EdDate = DateTime.Now
             };
-            #endregion
-
-            //Note item = new Note()
-            //{
-            //    Id = Guid.NewGuid(),
-            //    FolderId = args.FolderId,
-            //    Name = args.Name,
-            //    Text = args.Text,
-            //    CrDate = DateTime.Now,
-            //    EdDate = DateTime.Now
-            //};
 
             await _context.Notes.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -76,38 +60,16 @@ public class NoteController : ControllerBase
         }
     }
     // GET: api/<ValuesController>/id
-    [HttpGet("id"), Authorize]
-    public async Task<ActionResult<IBase>> GetById(string id)
+    [HttpGet("folderid"), Authorize]
+    public async Task<ActionResult<List<IBase>>> GetByFolderId(string folderid)
     {
         try
         {
-            var item = await _context.Notes.FirstOrDefaultAsync(u => u.Id == id);
-            if (item == null)
+            var items = await _context.Notes.Where(u => u.FolderId == folderid).ToListAsync();
+            if (items == null)
                 return NotFound();
 
-            return Ok(item);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-
-    //Testing ONLY
-    // GET: api/<ValuesController>/id
-    [HttpGet("id/profileId/show"), Authorize]
-    public async Task<ActionResult<IBase>> GetById(string id, string profileId, int show = 0)
-    {
-        try
-        {
-            AESService aes = new AESService();
-            Profile profile = await _context.Profiles.FirstOrDefaultAsync(p => p.Id == profileId);
-            var item = await _context.Notes.FirstOrDefaultAsync(u => u.Id == id);
-            item.Text = RSAService.RSADecrypt(item.Text, ConverterService.ReadEncodedKey(aes.Decrypt(profile.PrK, "Password123")), false);
-            if (item == null)
-                return NotFound();
-
-            return Ok(item);
+            return Ok(items);
         }
         catch (Exception e)
         {
@@ -117,7 +79,7 @@ public class NoteController : ControllerBase
 
     //Update
     // PUT api/<ValuesController>/id
-    [HttpPut("{id}"), Authorize]
+    [HttpPut("edit"), Authorize]
     public async Task<ActionResult> Put([FromBody] Note item)
     {
         try
@@ -137,7 +99,7 @@ public class NoteController : ControllerBase
     //Delete
     // DELETE api/<ValuesController>/id
     [HttpDelete("{id}"), Authorize]
-    public async Task<ActionResult> Delete(Guid id)
+    public async Task<ActionResult> Delete(string id)
     {
         try
         {

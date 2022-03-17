@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using SmoothNotesAPI.Models;
 using SmoothNotesAPI.Models.Interfaces;
 using SmoothNotesAPI.Models.Login;
+using SmoothNotesAPI.Models.Registration;
 using SmoothNotesAPI.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -36,63 +37,28 @@ public class ProfileController : ControllerBase
     //Create
     // POST api/<ValuesController>
     [HttpPost("register")]
-    public async Task<ActionResult> Register([FromBody] ProfileDto args)
+    public async Task<ActionResult> Register([FromBody] Register args)
     {
         try
         {
-            if (await _context.Profiles.AnyAsync(p => p.Name == args.username))
+            if (await _context.Profiles.AnyAsync(p => p.Name == args.Name))
                 return Ok("1");
 
-            string hpw = _hashingService.HashPW(args.password);
+            string hpw = _hashingService.HashPW(args.Pw);
 
-            //TODO: Remove when application side is implemented
-            //Testing only move to application side, when possible
-            #region Testing Only
-            //Rsa Key Pair
-            List<string> pair = new List<string>();
-            try
-            {
-                pair = rsa.GenKeyPair();
-            }
-            catch (Exception e)
-            {
-                return BadRequest($"Error##: {e.Message}");
-            }
-
-            //Aes encryption
-            string ePrK = "";
-            try
-            {
-                ePrK = aes.Encrypt(pair[0], args.password);
-            }
-            catch (Exception e)
-            {
-                return BadRequest($"Error##: {e.Message}");
-            }
+            
 
             //Test recive version
             Profile item = new Profile()
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = args.username,
+                Name = args.Name,
                 PW = hpw,
-                PrK = ePrK,
-                PuK = Convert.ToBase64String(ConverterService.HexStringToByteArray(pair[1])),
+                PrK = args.Prk,
+                PuK = args.PuK,
                 CrDate = DateTime.Now,
                 EdDate = DateTime.Now
             };
-            #endregion
-
-            //Profile item = new Profile()
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = args.Name,
-            //    PW = hpw,
-            //    PrK = args.PrK,
-            //    PuK = args.PuK,
-            //    CrDate = DateTime.Now,
-            //    EdDate = DateTime.Now
-            //};
 
             await _context.Profiles.AddAsync(item);
             await _context.SaveChangesAsync();
@@ -107,7 +73,8 @@ public class ProfileController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login(ProfileDto request)
     {
-        if (await _context.Profiles.AnyAsync(p => p.Name == request.username))
+        var p = await _context.Profiles.FirstOrDefaultAsync(u => u.Name == request.username);
+        if(p != null)
         {
             if (await VerifyPassword(request.username, request.password))
             {
@@ -116,6 +83,14 @@ public class ProfileController : ControllerBase
             }
         }
         return BadRequest("Login failed");
+        //if (await _context.Profiles.AnyAsync(p => p.Name == request.username))
+        //{
+        //    if (await VerifyPassword(request.username, request.password))
+        //    {
+        //        string token = CreateToken(await _context.Profiles.FirstOrDefaultAsync(p => p.Name == request.username));
+        //        return Ok(token);
+        //    }
+        //}
     }
 
     [HttpGet("refresh/username"), Authorize]
@@ -166,6 +141,7 @@ public class ProfileController : ControllerBase
             LProfile p = new LProfile();
             p.Id = item.Id.ToString();
             p.Name = item.Name;
+            p.PrK = item.PrK;
             p.PuK = item.PuK;
             p.folders = item.folders;
             return p;
@@ -182,44 +158,7 @@ public class ProfileController : ControllerBase
     {
         try
         {
-            //return Ok(await _context.Profiles.Include(s => s.folders).ToListAsync());
-
             return Ok(await _context.Profiles.Include(f => f.folders).ThenInclude(n => n.notes).ToListAsync());
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-    }
-
-    // GET: api/<ValuesController>/id/show
-    [HttpGet("id/show"), Authorize]
-    public async Task<ActionResult<IBase>> GetById(string id, int show = 0)
-    {
-        try
-        {
-            //var item = await _context.Profiles.Include(s => s.folders).FirstAsync(u => u.Id == id);
-            var item = await _context.Profiles.Where(p => p.Id == id).Include(f => f.folders).ThenInclude(n => n.notes).FirstOrDefaultAsync();
-            if (item == null)
-                return NotFound();
-
-            //TODO: Remove when application side is implemented
-            //Testing ONLY
-            if (show == 1)
-            {
-                try
-                {
-                    string dePrK = ConverterService.ReadEncodedKey(aes.Decrypt(item.PrK, "Password123"));
-                    item.PrK = dePrK;
-                    item.PuK = ConverterService.ReadEncodedKey(ConverterService.ByteArrayToHexString(Convert.FromBase64String(item.PuK)));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(Environment.NewLine + $"Error: {e.Message}");
-                }
-            }
-
-            return Ok(item);
         }
         catch (Exception e)
         {
@@ -248,13 +187,19 @@ public class ProfileController : ControllerBase
 
     //Delete
     // DELETE api/<ValuesController>/id
-    [HttpDelete("{id}"), Authorize]
+    [HttpDelete("id"), Authorize]
     public async Task<ActionResult> Delete(string id)
     {
         try
         {
-            //Finding Item with Id == id
+            //Getting Profile from id
             var profile = await _context.Profiles.FindAsync(id);
+            
+            //In case no profile is found
+            if (profile == null)
+                return NotFound();
+
+            //Getting all related folders, notes and removing them
             var folders = await _context.Folders.Where(f => f.ProfileId == id).ToListAsync();
             foreach (var folder in folders)
             {
@@ -264,9 +209,7 @@ public class ProfileController : ControllerBase
                 _context.Folders.Remove(folder);
             }
 
-            if (profile == null)
-                return NotFound();
-
+            //Remove profile and save
             _context.Profiles.Remove(profile);
             await _context.SaveChangesAsync();
             return Ok("Deletion Successful");
