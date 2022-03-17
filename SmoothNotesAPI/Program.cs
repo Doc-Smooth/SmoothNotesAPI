@@ -7,7 +7,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
 {
@@ -37,6 +36,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//Disabled to use http instead of https. Running things local.
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
