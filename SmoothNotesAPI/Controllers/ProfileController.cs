@@ -28,12 +28,6 @@ public class ProfileController : ControllerBase
         _hashingService = new HashingService();
     }
 
-    //TODO: Remove when application side is implemented
-    //Testing Only!!!
-    private AESService aes = new AESService();
-    private RSAService rsa = new RSAService();
-
-
     //Create
     // POST api/<ValuesController>
     [HttpPost("register")]
