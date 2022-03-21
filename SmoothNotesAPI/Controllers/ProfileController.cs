@@ -77,14 +77,6 @@ public class ProfileController : ControllerBase
             }
         }
         return BadRequest("Login failed");
-        //if (await _context.Profiles.AnyAsync(p => p.Name == request.username))
-        //{
-        //    if (await VerifyPassword(request.username, request.password))
-        //    {
-        //        string token = CreateToken(await _context.Profiles.FirstOrDefaultAsync(p => p.Name == request.username));
-        //        return Ok(token);
-        //    }
-        //}
     }
 
     [HttpGet("refresh/username"), Authorize]
